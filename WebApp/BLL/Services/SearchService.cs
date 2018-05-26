@@ -9,12 +9,18 @@ using DAL.Entities.JobPostManagement;
 using DAL.Entities.SeekerResumeBilder;
 using DAL.Interfaces;
 using AutoMapper;
+using BLL.Interfaces;
 
 namespace BLL.Services
 {
-    public class SearchService
+    public class SearchService : ISearchService
     {
         IUnitOfWork Database { get; set; }
+
+        public SearchService(IUnitOfWork uow)
+        {
+            this.Database = uow;
+        }
 
         public IEnumerable<JobPostDTO> FindVacancies(IEnumerable<JobTypeDTO> types,
                                                     IEnumerable<DateTime> dateTimes,

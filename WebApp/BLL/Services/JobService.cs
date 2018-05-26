@@ -9,8 +9,13 @@ using DAL.Interfaces;
 
 namespace BLL.Services
 {
-    public class JobPostingService
+    public class JobService
     {
         IUnitOfWork Database { get; set; }
+
+        public JobService(IUnitOfWork uow)
+        {
+            this.Database = uow;
+        }
     }
 }
