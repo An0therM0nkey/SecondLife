@@ -27,59 +27,88 @@ namespace WebApp.Controllers
         // GET api/vacancies
         public IHttpActionResult Get()
         {
-            var res = VacancyService.GetAll();
-            if (res != null)
-                return Ok(res);
-            else
-                return NotFound();
+            try
+            {
+                return Ok(VacancyService.GetAll());
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(ex.Property, ex.Message);
+            }
+            return BadRequest(ModelState);
         }
 
         // GET api/vacancies/5
         public IHttpActionResult Get(int id)
         {
-            var res = VacancyService.Get(id);
-            if (res != null)
-                return Ok(res);
-            else
-                return NotFound();
+            try
+            {
+                return Ok(VacancyService.Get(id));
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(ex.Property, ex.Message);
+            }
+            return BadRequest(ModelState);
         }   
 
         // POST api/vacancies
         public void Post([FromBody]JobPostDTO value)
         {
-            if (ModelState.IsValid)
-                return Ok(VacancyService.Create(value));
-            else
-                return BadRequest(ModelState);
+            try
+            {
+                if (ModelState.IsValid)
+                    return Ok(VacancyService.Create(value));
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(ex.Property, ex.Message);
+            }
+            return BadRequest(ModelState);
         }
 
         // PUT api/vacancies/5
         public IHttpActionResult Put([FromBody]JobPostDTO value)
         {
-            //try
-            //{
-            //    if(ModelState.IsValid)
-            //        return Ok(VacancyService.Change(value));
-            //}
-            //catch (ValidationException ex)
-            //{
-            //    //Not sure about this exception
-            //    return Content(HttpStatusCode.BadRequest, ex);
-            //}
-            if(ModelState.IsValid)
-                return Ok(VacancyService.Change(value));
-            else
-                return BadRequest(ModelState);
+            try
+            {
+                if (ModelState.IsValid)
+                    return Ok(VacancyService.Change(value));
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(ex.Property, ex.Message);
+            }
+            return BadRequest(ModelState);
         }
 
         // DELETE api/vacancies/5
         public IHttpActionResult Delete(int id)
         {
-            bool res = VacancyService.Delete(id);
-            if(res)
+            try
+            {
+                VacancyService.Delete(id);
                 return Ok();
-            else
-                return BadRequest(ModelState);
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(ex.Property, ex.Message);
+            }
+            return BadRequest(ModelState);
+        }
+
+        [Route("api/vacancies/resumes")]
+        public IHttpActionResult ViewResumes(int id)
+        {
+            try
+            {
+                return Ok(VacancyService.Review(id));
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(ex.Property, ex.Message);
+            }
+            return BadRequest(ModelState);
         }
     }
 }

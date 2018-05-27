@@ -25,17 +25,13 @@ namespace BLL.Services
             this.Database = uow;
         }
 
-        public bool Create(JobPostDTO jobPost)
+        public void Create(JobPostDTO jobPost)
         {
             if (Database.JobPosts.Get(jobPost.Id) != null)
-                throw new ValidationException("Job post already exists", "");
+                throw new ValidationException("Job post already exists", "JobPost");
             var mapper = new MapperConfiguration(cfg => cfg.CreateMap<JobPostDTO, JobPost>()).CreateMapper();
             var post = mapper.Map<JobPostDTO, JobPost>(jobPost);
             Database.JobPosts.Create(post);
-            if (Database.JobPosts.Get(jobPost.Id) != null)
-                return true;
-            else
-                return false;
         }
 
         public IEnumerable<JobPostDTO> Find(IEnumerable<JobTypeDTO> types,
@@ -45,7 +41,7 @@ namespace BLL.Services
             var mapper = new MapperConfiguration(cfg => cfg.CreateMap<JobPost, JobPostDTO>()).CreateMapper();
             var posts = mapper.Map<IEnumerable<JobPost>, List<JobPostDTO>>(Database.JobPosts.GetAll());
             if (posts.Count == 0)
-                throw new ValidationException("No matches", "");
+                throw new ValidationException("No matches", "JobPost");
             return posts.Where(p => p.JobType.Any(x => types.Contains(x))
                                && dateTimes.Any(x => x < p.CreatedDate)
                                && p.SkillSets.Any(x => skillSets.Contains(x)));
@@ -54,10 +50,10 @@ namespace BLL.Services
         public JobPostDTO Get(int? Id)
         {
             if (Id == null)
-                throw new ValidationException("Id not set", "");
+                throw new ValidationException("Id not set", "Id");
             var vacancy = Database.JobPosts.Get(Id.Value);
             if (vacancy == null)
-                throw new ValidationException("Job post not found", "");
+                throw new ValidationException("Job post not found", "JobPost");
             var mapper = new MapperConfiguration(cfg => cfg.CreateMap<JobPost, JobPostDTO>()).CreateMapper();
             return mapper.Map<JobPost, JobPostDTO>(vacancy);
         }
@@ -67,29 +63,40 @@ namespace BLL.Services
             var mapper = new MapperConfiguration(cfg => cfg.CreateMap<JobPost, JobPostDTO>()).CreateMapper();
             var posts = mapper.Map<IEnumerable<JobPost>, List<JobPostDTO>>(Database.JobPosts.GetAll());
             if (posts.Count == 0)
-                throw new ValidationException("No job posts yet", "");
+                throw new ValidationException("No job posts yet", "JobPost");
             return posts;
         }
 
-        public bool Delete(int? Id)
+        public void Delete(int? Id)
         {
             if (Database.JobPosts.Get(Id.Value) != null)
                 Database.JobPosts.Delete(Id.Value);
-            if (Database.JobPosts.Get(Id.Value) == null)
-                return true;
             else
-                return false;
+                throw new ValidationException("Job post doesn not exist", "SeekerResume");
         }
 
-        public bool Change(JobPostDTO value)
+        public void Change(JobPostDTO value)
         {
             var mapper = new MapperConfiguration(cfg => cfg.CreateMap<JobPostDTO, JobPost>()).CreateMapper();
             var post = mapper.Map<JobPostDTO, JobPost>(value);
             Database.JobPosts.Update(post);
-            if (Database.JobPosts.Get(post.Id).Equals(post))
-                return true;
-            else
-                return false;
+        }
+
+        public void Send(int senderId, int recieverId) //Implement?
+        {
+
+        }
+
+        public IEnumerable<SeekerResumeDTO> Review(int id)
+        {
+            var post = Database.JobPosts.Get(id);
+            if (post == null)
+                throw new ValidationException("Job post does not exist", "JobPost");
+            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResume, SeekerResumeDTO>()).CreateMapper();
+            var resumes = mapper.Map<IEnumerable<SeekerResume>, List<SeekerResumeDTO>>(post.SubmitedResumes);
+            if (resumes.Count == 0)
+                throw new ValidationException("No resumes yet", "SeekerResume");
+            return resumes;
         }
     }
 }

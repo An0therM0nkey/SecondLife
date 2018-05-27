@@ -10,7 +10,7 @@ namespace BLL.Interfaces
 {
     public interface IService<T> where T: class 
     {
-        bool Create(T value);
+        void Create(T value);
 
         IEnumerable<T> Find(IEnumerable<JobTypeDTO> types,
                             IEnumerable<DateTime> dateTimes,
@@ -20,8 +20,12 @@ namespace BLL.Interfaces
 
         IEnumerable<T> GetAll();
 
-        bool Delete(int? Id);
+        void Delete(int? Id);
 
-        bool Change(T value);
+        void Change(T value);
+
+        void Send(int senderId, int recieverId);
+
+        IEnumerable<T> Review(int id);
     }
 }

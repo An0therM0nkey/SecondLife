@@ -22,49 +22,89 @@ namespace WebApp.Controllers
         // GET api/resumes
         public IHttpActionResult Get()
         {
-            var res = ResumeService.GetAll();
-            if (res != null)
-                return Ok(res);
-            else
-                return NotFound();
+            try
+            {
+                return Ok(ResumeService.GetAll());
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(ex.Property, ex.Message);
+            }
+            return BadRequest(ModelState);
         }
 
         // GET api/resumes/5
         public IHttpActionResult Get(int id)
         {
-            var res = ResumeService.Get(id);
-            if (res != null)
-                return Ok(res);
-            else
-                return NotFound();
+            try
+            {
+                return Ok(ResumeService.Get(id));
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(ex.Property, ex.Message);
+            }
+            return BadRequest(ModelState);
         }
 
         // POST api/resumes
         public void Post([FromBody]SeekerResumeDTO value)
         {
-            if (ModelState.IsValid)
-                return Ok(ResumeService.Create(value));
-            else
-                return BadRequest(ModelState);
+            try
+            {
+                if (ModelState.IsValid)
+                    return Ok(ResumeService.Create(value));
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(ex.Property, ex.Message);
+            }
+            return BadRequest(ModelState);
         }
 
         // PUT api/resumes/5
         public IHttpActionResult Put([FromBody]SeekerResumeDTO value)
         {
-            if (ModelState.IsValid)
-                return Ok(ResumeService.Change(value));
-            else
-                return BadRequest(ModelState);
+            try
+            {
+                if (ModelState.IsValid)
+                    return Ok(ResumeService.Change(value));
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(ex.Property, ex.Message);
+            }
+            return BadRequest(ModelState);
         }
 
         // DELETE api/resumes/5
         public IHttpActionResult Delete(int id)
         {
-            bool res = ResumeService.Delete(id);
-            if (res)
+            try
+            {
+                ResumeService.Delete(id);
                 return Ok();
-            else
-                return BadRequest(ModelState);
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(ex.Property, ex.Message);
+            }
+            return BadRequest(ModelState);
+        }
+
+        [Route("api/resumes/send")]
+        public IHttpActionResult Send(int senderId, int recieverId)
+        {
+            try
+            {
+                ResumeService.Send(senderId, recieverId);
+                return Ok();
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(ex.Property, ex.Message);
+            }
+            return BadRequest(ModelState);
         }
     }
 }
