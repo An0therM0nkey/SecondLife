@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DAL.Entities.JobPostManagement;
 
 namespace DAL.Entities.SeekerResumeBilder
 {
@@ -15,6 +16,8 @@ namespace DAL.Entities.SeekerResumeBilder
         [ForeignKey("User")]
         public virtual string UserID { get; set; }
         public virtual ApplicationUser User { get; set; }
+        
+        public virtual IEnumerable<JobType> JobType { get; set; } = new List<JobType>();
 
         public string FirstName { get; set; }
         public string LastName { get; set; }

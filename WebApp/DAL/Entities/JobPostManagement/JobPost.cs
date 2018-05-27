@@ -17,8 +17,7 @@ namespace DAL.Entities.JobPostManagement
         [ForeignKey("User")]
         public virtual string PostedByID { get; set; }
         public virtual ApplicationUser User { get; set; }
-
-        public virtual int JobTypeID { get; set; }
+        
         public virtual IEnumerable<JobType> JobType { get; set; } = new List<JobType>();
 
         public string CompanyName { get; set; }
