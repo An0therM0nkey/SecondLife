@@ -4,37 +4,78 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using BLL.Interfaces;
+using BLL.Services;
+using BLL.Infrastructure;
+using BLL.DTO.JobPostManagement;
+using BLL.DTO.SeekerResumeBuilder;
+using System.Web.Http.Description;
+using System.Web.Http.Results;
 
 namespace WebApp.Controllers
 {
     [Authorize]
     public class VacanciesController : ApiController
     {
-        // GET api/vacncies
-        public IEnumerable<string> Get()
+        IService<JobPostDTO> VacancyService;
+
+        public VacanciesController(IService<JobPostDTO> serv)
         {
-            return new string[] { "value1", "value2" };
+            VacancyService = serv;
+        }
+
+        // GET api/vacancies
+        public IHttpActionResult Get()
+        {
+            var res = VacancyService.GetAll();
+            if (res != null)
+                return Ok(res);
+            else
+                return NotFound();
         }
 
         // GET api/vacancies/5
-        public string Get(int id)
+        public IHttpActionResult Get(int id)
         {
-            return "value";
-        }
+            var res = VacancyService.Get(id);
+            if (res != null)
+                return Ok(res);
+            else
+                return NotFound();
+        }   
 
         // POST api/vacancies
-        public void Post([FromBody]string value)
+        public void Post([FromBody]JobPostDTO value)
         {
         }
 
         // PUT api/vacancies/5
-        public void Put(int id, [FromBody]string value)
+        public IHttpActionResult Put([FromBody]JobPostDTO value)
         {
+            //try
+            //{
+            //    if(ModelState.IsValid)
+            //        return Ok(VacancyService.Change(value));
+            //}
+            //catch (ValidationException ex)
+            //{
+            //    //Not sure about this exception
+            //    return Content(HttpStatusCode.BadRequest, ex);
+            //}
+            if(ModelState.IsValid)
+                return Ok(VacancyService.Change(value));
+            else
+                return BadRequest(ModelState);
         }
 
         // DELETE api/vacancies/5
-        public void Delete(int id)
+        public IHttpActionResult Delete(int id)
         {
+            bool res = VacancyService.Delete(id);
+            if(res)
+                return Ok();
+            else
+                return BadRequest(ModelState);
         }
     }
 }

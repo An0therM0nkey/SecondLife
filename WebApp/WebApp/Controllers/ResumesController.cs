@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BLL.DTO.SeekerResumeBuilder;
+using BLL.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -10,16 +12,31 @@ namespace WebApp.Controllers
     [Authorize]
     public class ResumesController : ApiController
     {
-        // GET api/resumes
-        public IEnumerable<string> Get()
+        IService<SeekerResumeDTO> ResumeService;
+
+        public ResumesController(IService<SeekerResumeDTO> serv)
         {
-            return new string[] { "value1", "value2" };
+            ResumeService = serv;
+        }
+
+        // GET api/resumes
+        public IHttpActionResult Get()
+        {
+            var res = ResumeService.GetAll();
+            if (res != null)
+                return Ok(res);
+            else
+                return NotFound();
         }
 
         // GET api/resumes/5
-        public string Get(int id)
+        public IHttpActionResult Get(int id)
         {
-            return "value";
+            var res = ResumeService.Get(id);
+            if (res != null)
+                return Ok(res);
+            else
+                return NotFound();
         }
 
         // POST api/resumes
@@ -28,13 +45,22 @@ namespace WebApp.Controllers
         }
 
         // PUT api/resumes/5
-        public void Put(int id, [FromBody]string value)
+        public IHttpActionResult Put([FromBody]SeekerResumeDTO value)
         {
+            if (ModelState.IsValid)
+                return Ok(ResumeService.Change(value));
+            else
+                return BadRequest(ModelState);
         }
 
         // DELETE api/resumes/5
-        public void Delete(int id)
+        public IHttpActionResult Delete(int id)
         {
+            bool res = ResumeService.Delete(id);
+            if (res)
+                return Ok();
+            else
+                return BadRequest(ModelState);
         }
     }
 }
