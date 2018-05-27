@@ -25,6 +25,19 @@ namespace BLL.Services
             this.Database = uow;
         }
 
+        public bool Create(JobPostDTO jobPost)
+        {
+            if (Database.JobPosts.Get(jobPost.Id) != null)
+                throw new ValidationException("Job post already exists", "");
+            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<JobPostDTO, JobPost>()).CreateMapper();
+            var post = mapper.Map<JobPostDTO, JobPost>(jobPost);
+            Database.JobPosts.Create(post);
+            if (Database.JobPosts.Get(jobPost.Id) != null)
+                return true;
+            else
+                return false;
+        }
+
         public IEnumerable<JobPostDTO> Find(IEnumerable<JobTypeDTO> types,
                                                    IEnumerable<DateTime> dateTimes,
                                                    IEnumerable<SkillSetDTO> skillSets) //NEEDS TESTING, DATA COMPARISON COULD BE INCORRECT
@@ -60,10 +73,9 @@ namespace BLL.Services
 
         public bool Delete(int? Id)
         {
-            JobPost post = Database.JobPosts.Get(Id.Value);
-            if (post != null)
+            if (Database.JobPosts.Get(Id.Value) != null)
                 Database.JobPosts.Delete(Id.Value);
-            if (Database.JobPosts.Get(post.Id) == null)
+            if (Database.JobPosts.Get(Id.Value) == null)
                 return true;
             else
                 return false;

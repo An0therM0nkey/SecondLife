@@ -10,6 +10,8 @@ namespace BLL.Interfaces
 {
     public interface IService<T> where T: class 
     {
+        bool Create(T value);
+
         IEnumerable<T> Find(IEnumerable<JobTypeDTO> types,
                             IEnumerable<DateTime> dateTimes,
                             IEnumerable<SkillSetDTO> skillSets);
