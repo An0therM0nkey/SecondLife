@@ -28,7 +28,9 @@ namespace WebApp
             NinjectModule resumeModule = new ResumeModule();
             NinjectModule serviceModule = new ServiceModule("DefaultConnection");
             var kernel = new StandardKernel(resumeModule, vacancyModule, serviceModule);
-            DependencyResolver.SetResolver(kernel);
+            var ninjectResolver = new NinjectDependencyResolver(kernel);
+            DependencyResolver.SetResolver(ninjectResolver); // MVC
+            GlobalConfiguration.Configuration.DependencyResolver = ninjectResolver; // Web API
         }
     }
 }
