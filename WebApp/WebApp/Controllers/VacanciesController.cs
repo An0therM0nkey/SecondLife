@@ -47,6 +47,10 @@ namespace WebApp.Controllers
         // POST api/vacancies
         public void Post([FromBody]JobPostDTO value)
         {
+            if (ModelState.IsValid)
+                return Ok(VacancyService.Create(value));
+            else
+                return BadRequest(ModelState);
         }
 
         // PUT api/vacancies/5
