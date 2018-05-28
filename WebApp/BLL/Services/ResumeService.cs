@@ -23,7 +23,21 @@ namespace BLL.Services
         public ResumeService(IUnitOfWork uow)
         {
             this.Database = uow;
-        }   
+        }
+
+        public bool Create(SeekerResumeDTO resume)
+        {
+            if (Database.SeekerResumes.Get(resume.Id) != null)
+                throw new ValidationException("Job post already exists", "");
+            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResumeDTO, SeekerResume>()).CreateMapper();
+            var newResume = mapper.Map<SeekerResumeDTO, SeekerResume>(resume);
+            Database.SeekerResumes.Create(newResume);
+            if (Database.SeekerResumes.Get(resume.Id) != null)
+                return true;
+            else
+                return false;
+
+        }
 
         public IEnumerable<SeekerResumeDTO> Find(IEnumerable<JobTypeDTO> types,
                                                    IEnumerable<DateTime> dateTimes,

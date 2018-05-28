@@ -40,8 +40,12 @@ namespace WebApp.Controllers
         }
 
         // POST api/resumes
-        public void Post([FromBody]string value)
+        public void Post([FromBody]SeekerResumeDTO value)
         {
+            if (ModelState.IsValid)
+                return Ok(ResumeService.Create(value));
+            else
+                return BadRequest(ModelState);
         }
 
         // PUT api/resumes/5
