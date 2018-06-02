@@ -16,7 +16,7 @@ using AutoMapper;
 
 namespace BLL.Services
 {
-    public class JobService : IService<JobPostDTO>
+    public class JobService : IJobService
     {
         IUnitOfWork Database { get; set; }
 
@@ -45,6 +45,15 @@ namespace BLL.Services
             return posts.Where(p => p.JobType.Any(x => types.Contains(x))
                                && dateTimes.Any(x => x < p.CreatedDate)
                                && p.SkillSets.Any(x => skillSets.Contains(x)));
+        }
+
+        public IEnumerable<JobPostDTO> Find(string key)
+        {
+            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<JobPost, JobPostDTO>()).CreateMapper();
+            var posts = mapper.Map<IEnumerable<JobPost>, List<JobPostDTO>>(Database.JobPosts.GetAll());
+            if (posts.Count == 0)
+                throw new ValidationException("No matches", "JobPost");
+            return posts.Where(p => p.CompanyName.ToLower().Contains(key.ToLower()));
         }
 
         public JobPostDTO Get(int? Id)
@@ -82,12 +91,12 @@ namespace BLL.Services
             Database.JobPosts.Update(post);
         }
 
-        public void Send(int senderId, int recieverId) //Implement?
+        public void NotifySeeker(int senderId, int recieverId) //Implement?
         {
 
         }
 
-        public IEnumerable<SeekerResumeDTO> Review(int id)
+        public IEnumerable<SeekerResumeDTO> ReviewResumes(int id) //Implement?
         {
             var post = Database.JobPosts.Get(id);
             if (post == null)

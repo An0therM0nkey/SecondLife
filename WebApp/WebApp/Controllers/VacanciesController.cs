@@ -17,9 +17,9 @@ namespace WebApp.Controllers
     [Authorize]
     public class VacanciesController : ApiController
     {
-        IService<JobPostDTO> VacancyService;
+        IJobService VacancyService;
 
-        public VacanciesController(IService<JobPostDTO> serv)
+        public VacanciesController(IJobService serv)
         {
             VacancyService = serv;
         }

@@ -12,9 +12,9 @@ namespace WebApp.Controllers
     [Authorize]
     public class ResumesController : ApiController
     {
-        IService<SeekerResumeDTO> ResumeService;
+        IResumeService ResumeService;
 
-        public ResumesController(IService<SeekerResumeDTO> serv)
+        public ResumesController(IResumeService serv)
         {
             ResumeService = serv;
         }
