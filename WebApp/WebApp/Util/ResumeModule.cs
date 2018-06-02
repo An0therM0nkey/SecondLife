@@ -13,7 +13,7 @@ namespace WebApp.Util
     {
         public override void Load()
         {
-            Bind<IService<SeekerResumeDTO>>().To<ResumeService>();
+            Bind<IResumeService>().To<ResumeService>();
         }
     }
 }

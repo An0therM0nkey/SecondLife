@@ -13,7 +13,7 @@ namespace WebApp.Util
     {
         public override void Load()
         {
-            Bind<IService<JobPostDTO>>().To<JobService>();
+            Bind<IJobService>().To<JobService>();
         }
     }
 }

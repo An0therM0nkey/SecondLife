@@ -1,11 +1,16 @@
-﻿using BLL.DTO.SeekerResumeBuilder;
-using BLL.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using BLL.Interfaces;
+using BLL.Services;
+using BLL.Infrastructure;
+using BLL.DTO.JobPostManagement;
+using BLL.DTO.SeekerResumeBuilder;
+using System.Web.Http.Description;
+using System.Web.Http.Results;
 
 namespace WebApp.Controllers
 {
@@ -48,12 +53,12 @@ namespace WebApp.Controllers
         }
 
         // POST api/resumes
-        public void Post([FromBody]SeekerResumeDTO value)
+        public IHttpActionResult Post([FromBody]SeekerResumeDTO value)
         {
             try
             {
                 if (ModelState.IsValid)
-                    return Ok(ResumeService.Create(value));
+                    return Ok();
             }
             catch (ValidationException ex)
             {
@@ -68,7 +73,7 @@ namespace WebApp.Controllers
             try
             {
                 if (ModelState.IsValid)
-                    return Ok(ResumeService.Change(value));
+                    return Ok();
             }
             catch (ValidationException ex)
             {
@@ -97,7 +102,7 @@ namespace WebApp.Controllers
         {
             try
             {
-                ResumeService.Send(senderId, recieverId);
+                ResumeService.SendResume(senderId, recieverId);
                 return Ok();
             }
             catch (ValidationException ex)

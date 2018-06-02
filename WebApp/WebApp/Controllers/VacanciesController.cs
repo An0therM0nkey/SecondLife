@@ -53,12 +53,12 @@ namespace WebApp.Controllers
         }   
 
         // POST api/vacancies
-        public void Post([FromBody]JobPostDTO value)
+        public IHttpActionResult Post([FromBody]JobPostDTO value)
         {
             try
             {
                 if (ModelState.IsValid)
-                    return Ok(VacancyService.Create(value));
+                    return Ok();
             }
             catch (ValidationException ex)
             {
@@ -73,7 +73,7 @@ namespace WebApp.Controllers
             try
             {
                 if (ModelState.IsValid)
-                    return Ok(VacancyService.Change(value));
+                    return Ok();
             }
             catch (ValidationException ex)
             {
@@ -102,7 +102,7 @@ namespace WebApp.Controllers
         {
             try
             {
-                return Ok(VacancyService.Review(id));
+                return Ok(VacancyService.ReviewResumes(id));
             }
             catch (ValidationException ex)
             {
