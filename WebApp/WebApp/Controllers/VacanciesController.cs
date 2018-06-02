@@ -11,6 +11,7 @@ using BLL.DTO.JobPostManagement;
 using BLL.DTO.SeekerResumeBuilder;
 using System.Web.Http.Description;
 using System.Web.Http.Results;
+using WebApp.Models;
 
 namespace WebApp.Controllers
 {
@@ -58,7 +59,10 @@ namespace WebApp.Controllers
             try
             {
                 if (ModelState.IsValid)
+                {
+                    VacancyService.Change(value);
                     return Ok();
+                }
             }
             catch (ValidationException ex)
             {
@@ -73,7 +77,10 @@ namespace WebApp.Controllers
             try
             {
                 if (ModelState.IsValid)
+                {
+                    VacancyService.Create(value);
                     return Ok();
+                }
             }
             catch (ValidationException ex)
             {
@@ -103,6 +110,49 @@ namespace WebApp.Controllers
             try
             {
                 return Ok(VacancyService.ReviewResumes(id));
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(ex.Property, ex.Message);
+            }
+            return BadRequest(ModelState);
+        }
+
+        [Route("api/vacancies/send")]
+        public IHttpActionResult Send(int senderId, int recieverId)
+        {
+            try
+            {
+                VacancyService.NotifySeeker(senderId, recieverId);
+                return Ok();
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(ex.Property, ex.Message);
+            }
+            return BadRequest(ModelState);
+        }
+
+        [Route("api/vacancies/search")]
+        public IHttpActionResult Search([FromBody]string key)
+        {
+            try
+            {
+                return Ok(VacancyService.Find(key));
+            }
+            catch (ValidationException ex)
+            {
+                ModelState.AddModelError(ex.Property, ex.Message);
+            }
+            return BadRequest(ModelState);
+        }
+
+        [Route("api/vacancies/filter")]
+        public IHttpActionResult Filter([FromBody]SearchRequest searchRequest)
+        {
+            try
+            {
+                return Ok(VacancyService.Find(searchRequest.types, searchRequest.dateTimes, searchRequest.skillSets));
             }
             catch (ValidationException ex)
             {

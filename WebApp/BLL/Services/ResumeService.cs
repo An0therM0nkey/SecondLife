@@ -31,6 +31,7 @@ namespace BLL.Services
                 throw new ValidationException("Job post already exists", "SeekerResume");
             var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResumeDTO, SeekerResume>()).CreateMapper();
             var newResume = mapper.Map<SeekerResumeDTO, SeekerResume>(resume);
+            newResume.VacanciesAcceptedBy = new List<JobPost>();
             Database.SeekerResumes.Create(newResume);
         }
 
@@ -89,8 +90,10 @@ namespace BLL.Services
         public void Change(SeekerResumeDTO value)
         {
             var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResumeDTO, SeekerResume>()).CreateMapper();
-            var resume = mapper.Map<SeekerResumeDTO, SeekerResume>(value);
-            Database.SeekerResumes.Update(resume);
+            var newResume = mapper.Map<SeekerResumeDTO, SeekerResume>(value);
+            var oldResume = Database.SeekerResumes.Get(value.Id);
+            newResume.VacanciesAcceptedBy = oldResume.VacanciesAcceptedBy;
+            Database.SeekerResumes.Update(newResume);
         }
 
         public void SendResume(int senderId, int recieverId)
@@ -102,6 +105,7 @@ namespace BLL.Services
             if (vacancy == null)
                 throw new ValidationException("Vacancy does not exitst", "JobPost");
             vacancy.SubmitedResumes.Concat(new[] { resume });
+            Database.JobPosts.Update(vacancy);
         }
 
         public IEnumerable<JobPostDTO> ReviewVacancies(int id)

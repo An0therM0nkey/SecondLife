@@ -19,7 +19,6 @@ namespace BLL.DTO.JobPostManagement
         public int JobLocationID { get; set; }
         public JobLocationDTO JobLocation { get; set; }
         public bool IsActive { get; set; }
-        public IEnumerable<SeekerResumeDTO> SubmitedResumes { get; set; } //Containe submited resumes for this vacancy
-        public IEnumerable<SkillSetDTO> SkillSets { get; set; } //Skills for this vacancy
+        public IEnumerable<SkillSetDTO> SkillSets { get; set; }
     }
 }
