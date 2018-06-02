@@ -16,7 +16,7 @@ using AutoMapper;
 
 namespace BLL.Services
 {
-    public class ResumeService : IService<SeekerResumeDTO>
+    public class ResumeService : IResumeService
     {
         IUnitOfWork Database { get; set; }
 
@@ -41,10 +41,20 @@ namespace BLL.Services
             var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResume, SeekerResumeDTO>()).CreateMapper();
             var resumes = mapper.Map<IEnumerable<SeekerResume>, List<SeekerResumeDTO>>(Database.SeekerResumes.GetAll());
             if (resumes.Count == 0)
-                throw new ValidationException("No matches", "JobPost");
+                throw new ValidationException("No matches", "SeekerResume");
             return resumes.Where(p => p.ExperienceDetails.Any(x => dateTimes.Any(y => (x.EndDate - x.StartDate) >= y.TimeOfDay))
                                && p.SkillSets.Any(x => skillSets.Contains(x))
                                && p.JobType.Any(x => types.Contains(x)));
+        }
+
+        public IEnumerable<SeekerResumeDTO> Find(string key)
+        {
+            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResume, SeekerResumeDTO>()).CreateMapper();
+            var resumes = mapper.Map<IEnumerable<SeekerResume>, List<SeekerResumeDTO>>(Database.SeekerResumes.GetAll());
+            if (resumes.Count == 0)
+                throw new ValidationException("No matches", "SeekerResume");
+            return resumes.Where(p => p.FirstName.ToLower().Contains(key.ToLower()) 
+                                || p.LastName.ToLower().Contains(key.ToLower()));
         }
 
         public SeekerResumeDTO Get(int? Id)
@@ -83,7 +93,7 @@ namespace BLL.Services
             Database.SeekerResumes.Update(resume);
         }
 
-        public void Send(int senderId, int recieverId)
+        public void SendResume(int senderId, int recieverId)
         {
             var resume = Database.SeekerResumes.Get(senderId);
             var vacancy = Database.JobPosts.Get(recieverId);
@@ -94,7 +104,7 @@ namespace BLL.Services
             vacancy.SubmitedResumes.Concat(new[] { resume });
         }
 
-        public IEnumerable<JobPostDTO> Review(int id) //Implement?
+        public IEnumerable<JobPostDTO> ReviewVacancies(int id)
         {
             return null;
         }

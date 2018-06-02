@@ -56,7 +56,8 @@
     <Compile Include="DTO\SeekerResumeBuilder\SkillSetDTO.cs" />
     <Compile Include="Infrastructure\ServiceModule.cs" />
     <Compile Include="Infrastructure\ValidationException.cs" />
-    <Compile Include="Interfaces\IService.cs" />
+    <Compile Include="Interfaces\IJobService.cs" />
+    <Compile Include="Interfaces\IResumeService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\JobService.cs" />
     <Compile Include="Services\ResumeService.cs" />
