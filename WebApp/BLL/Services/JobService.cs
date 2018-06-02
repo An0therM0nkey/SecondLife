@@ -93,7 +93,13 @@ namespace BLL.Services
 
         public void NotifySeeker(int senderId, int recieverId) //Implement?
         {
-
+            var resume = Database.SeekerResumes.Get(senderId);
+            var vacancy = Database.JobPosts.Get(recieverId);
+            if (resume == null)
+                throw new ValidationException("Resume does not exist", "SeekerResume");
+            if (vacancy == null)
+                throw new ValidationException("Vacancy does not exitst", "JobPost");
+            resume.VacanciesAcceptedBy.Concat(new[] { vacancy });
         }
 
         public IEnumerable<SeekerResumeDTO> ReviewResumes(int id) //Implement?

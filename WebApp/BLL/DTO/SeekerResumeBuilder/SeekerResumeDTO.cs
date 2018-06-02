@@ -20,5 +20,6 @@ namespace BLL.DTO.SeekerResumeBuilder
         public IEnumerable<EducationDetailDTO> EducationDetails { get; set; } = new List<EducationDetailDTO>();
         public IEnumerable<ExperienceDetailDTO> ExperienceDetails { get; set; } = new List<ExperienceDetailDTO>();
         public IEnumerable<SkillSetDTO> SkillSets { get; set; } = new List<SkillSetDTO>();
+        public IEnumerable<JobPostDTO> VacanciesAcceptedBy { get; set; }
     }
 }

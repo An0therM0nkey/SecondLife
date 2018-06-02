@@ -29,5 +29,7 @@ namespace DAL.Entities.SeekerResumeBilder
         public IEnumerable<ExperienceDetail> ExperienceDetails { get; set; } = new List<ExperienceDetail>();
         public IEnumerable<SkillSet> SkillSets { get; set; } = new List<SkillSet>();
 
+        public IEnumerable<JobPost> VacanciesAcceptedBy { get; set; }
+
     }
 }

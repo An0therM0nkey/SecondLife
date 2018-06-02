@@ -106,7 +106,14 @@ namespace BLL.Services
 
         public IEnumerable<JobPostDTO> ReviewVacancies(int id)
         {
-            return null;
+            var resume = Database.SeekerResumes.Get(id);
+            if (resume == null)
+                throw new ValidationException("Resume does not exist", "Seeker Resume");
+            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<JobPost, JobPostDTO>()).CreateMapper();
+            var posts = mapper.Map<IEnumerable<JobPost>, List<JobPostDTO>>(resume.VacanciesAcceptedBy);
+            if (posts.Count == 0)
+                throw new ValidationException("No posts yet", "JobPost");
+            return posts;
         }
     }
 }
