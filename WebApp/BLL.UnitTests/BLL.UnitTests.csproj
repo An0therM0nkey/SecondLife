@@ -72,6 +72,7 @@
   <ItemGroup>
     <Compile Include="JobServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResumeServiceTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -34,7 +34,7 @@ namespace BLL.UnitTests
 
         //Checks if create method passes correct object to uow repo
         [Test]
-        public void Create_writes_no_null()
+        public void Create_jobpost_writes_no_null()
         {
             //Arrange
             JobPostDTO jobPostDTO = _fixture.Create<JobPostDTO>();

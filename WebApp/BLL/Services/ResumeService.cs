@@ -29,7 +29,11 @@ namespace BLL.Services
         {
             if (Database.SeekerResumes.Get(resume.Id) != null)
                 throw new ValidationException("Job post already exists", "SeekerResume");
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResumeDTO, SeekerResume>()).CreateMapper();
+            var edMapper = new MapperConfiguration(cfg => cfg.CreateMap<EducationDetailDTO, EducationDetail>()).CreateMapper();
+            var exMapper = new MapperConfiguration(cfg => cfg.CreateMap<ExperienceDetailDTO, ExperienceDetail>()).CreateMapper();
+            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResumeDTO, SeekerResume>()
+                                                .ForMember(d => d.EducationDetails, o => o.MapFrom(s => edMapper.Map<IEnumerable<EducationDetailDTO>, IEnumerable<EducationDetail>>(s.EducationDetails)))
+                                                .ForMember(d => d.ExperienceDetails, o => o.MapFrom(s => exMapper.Map<IEnumerable<ExperienceDetailDTO>, IEnumerable<ExperienceDetail>>(s.ExperienceDetails)))).CreateMapper();
             var newResume = mapper.Map<SeekerResumeDTO, SeekerResume>(resume);
             newResume.VacanciesAcceptedBy = new List<JobPost>();
             Database.SeekerResumes.Create(newResume);
@@ -89,7 +93,11 @@ namespace BLL.Services
 
         public void Change(SeekerResumeDTO value)
         {
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResumeDTO, SeekerResume>()).CreateMapper();
+            var edMapper = new MapperConfiguration(cfg => cfg.CreateMap<EducationDetailDTO, EducationDetail>()).CreateMapper();
+            var exMapper = new MapperConfiguration(cfg => cfg.CreateMap<ExperienceDetailDTO, ExperienceDetail>()).CreateMapper();
+            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResumeDTO, SeekerResume>()
+                                                .ForMember(d => d.EducationDetails, o => o.MapFrom(s => edMapper.Map<IEnumerable<EducationDetailDTO>, IEnumerable<EducationDetail>>(s.EducationDetails)))
+                                                .ForMember(d => d.ExperienceDetails, o => o.MapFrom(s => exMapper.Map<IEnumerable<ExperienceDetailDTO>, IEnumerable<ExperienceDetail>>(s.ExperienceDetails)))).CreateMapper();
             var newResume = mapper.Map<SeekerResumeDTO, SeekerResume>(value);
             var oldResume = Database.SeekerResumes.Get(value.Id);
             newResume.VacanciesAcceptedBy = oldResume.VacanciesAcceptedBy;
