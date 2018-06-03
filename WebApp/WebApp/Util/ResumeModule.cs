@@ -1,5 +1,4 @@
-﻿using BLL.DTO.SeekerResumeBuilder;
-using BLL.Interfaces;
+﻿using BLL.Interfaces;
 using BLL.Services;
 using Ninject.Modules;
 using System;

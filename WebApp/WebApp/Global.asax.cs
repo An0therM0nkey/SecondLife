@@ -1,4 +1,5 @@
 ﻿using BLL.Infrastructure;
+using DAL;
 using Ninject;
 using Ninject.Modules;
 using System;
@@ -9,7 +10,9 @@ using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using WebApp.Models;
 using WebApp.Util;
+using System.Data.Entity;
 
 namespace WebApp
 {
@@ -24,13 +27,14 @@ namespace WebApp
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
             //Ninject module binding
-            NinjectModule vacancyModule = new VacancyModule();
-            NinjectModule resumeModule = new ResumeModule();
-            NinjectModule serviceModule = new ServiceModule("DefaultConnection");
-            var kernel = new StandardKernel(resumeModule, vacancyModule, serviceModule);
-            var ninjectResolver = new NinjectDependencyResolver(kernel);
-            DependencyResolver.SetResolver(ninjectResolver); // MVC
-            GlobalConfiguration.Configuration.DependencyResolver = ninjectResolver; // Web API
+            //NinjectModule ninjectModule = new NinjectSetting();
+            //NinjectModule vacancyModule = new VacancyModule();
+            //NinjectModule resumeModule = new ResumeModule();
+            //NinjectModule serviceModule = new ServiceModule("DefaultConnection");
+            //var kernel = new StandardKernel(ninjectModule, serviceModule);
+            //var ninjectResolver = new NinjectDependencyResolver(kernel);
+            //DependencyResolver.SetResolver(ninjectResolver); // MVC
+            //GlobalConfiguration.Configuration.DependencyResolver = ninjectResolver; // Web API
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using BLL.DTO.JobPostManagement;
-using BLL.Interfaces;
+﻿using BLL.Interfaces;
 using BLL.Services;
 using Ninject.Modules;
 using System;
