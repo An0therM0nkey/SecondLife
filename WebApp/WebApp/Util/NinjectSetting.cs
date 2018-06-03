@@ -1,5 +1,4 @@
-﻿using BLL.DTO.SeekerResumeBuilder;
-using BLL.Interfaces;
+﻿using BLL.Interfaces;
 using BLL.Services;
 using Ninject.Modules;
 using System;
@@ -9,11 +8,12 @@ using System.Web;
 
 namespace WebApp.Util
 {
-    public class ResumeModule : NinjectModule
+    public class NinjectSetting : NinjectModule
     {
         public override void Load()
         {
             Bind<IResumeService>().To<ResumeService>();
+            Bind<IJobService>().To<JobService>();
         }
     }
 }
