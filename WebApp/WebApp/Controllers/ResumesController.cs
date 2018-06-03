@@ -26,6 +26,9 @@ namespace WebApp.Controllers
         }
 
         // GET api/resumes
+        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "recruiter")]
+        [Authorize(Roles = "seeker")]
         public IHttpActionResult Get()
         {
             try
@@ -40,6 +43,9 @@ namespace WebApp.Controllers
         }
 
         // GET api/resumes/5
+        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "recruiter")]
+        [Authorize(Roles = "seeker")]
         public IHttpActionResult Get(int id)
         {
             try
@@ -54,6 +60,8 @@ namespace WebApp.Controllers
         }
 
         // POST api/resumes
+        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "seeker")]
         public IHttpActionResult Post([FromBody]SeekerResumeDTO value)
         {
             try
@@ -72,6 +80,8 @@ namespace WebApp.Controllers
         }
 
         // PUT api/resumes/5
+        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "seeker")]
         public IHttpActionResult Put([FromBody]SeekerResumeDTO value)
         {
             try
@@ -90,6 +100,8 @@ namespace WebApp.Controllers
         }
 
         // DELETE api/resumes/5
+        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "seeker")]
         public IHttpActionResult Delete(int id)
         {
             try
@@ -105,6 +117,8 @@ namespace WebApp.Controllers
         }
 
         [Route("api/resumes/vacancies")]
+        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "seeker")]
         public IHttpActionResult ViewResumes(int id)
         {
             try
@@ -119,6 +133,8 @@ namespace WebApp.Controllers
         }
 
         [Route("api/resumes/send")]
+        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "seeker")]
         public IHttpActionResult Send(int senderId, int recieverId)
         {
             try
@@ -134,6 +150,9 @@ namespace WebApp.Controllers
         }
 
         [Route("api/resumes/search")]
+        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "recruiter")]
+        [Authorize(Roles = "seeker")]
         public IHttpActionResult Search([FromBody]string key)
         {
             try
@@ -148,6 +167,9 @@ namespace WebApp.Controllers
         }
 
         [Route("api/resumes/filter")]
+        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "recruiter")]
+        [Authorize(Roles = "seeker")]
         public IHttpActionResult Filter([FromBody]SearchRequest searchRequest)
         {
             try

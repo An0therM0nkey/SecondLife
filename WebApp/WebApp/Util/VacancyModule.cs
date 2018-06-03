@@ -8,11 +8,10 @@ using System.Web;
 
 namespace WebApp.Util
 {
-    public class NinjectSetting : NinjectModule
+    public class VacancyModule : NinjectModule
     {
         public override void Load()
         {
-            Bind<IResumeService>().To<ResumeService>();
             Bind<IJobService>().To<JobService>();
         }
     }

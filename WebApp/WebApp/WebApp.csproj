@@ -271,7 +271,8 @@
     <Compile Include="Startup.cs" />
     <Compile Include="Util\NinjectDependencyResolver.cs" />
     <Compile Include="Util\NinjectDependencyScope.cs" />
-    <Compile Include="Util\NinjectSetting.cs" />
+    <Compile Include="Util\ResumeModule.cs" />
+    <Compile Include="Util\VacancyModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
