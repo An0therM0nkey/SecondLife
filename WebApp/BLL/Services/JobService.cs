@@ -20,23 +20,35 @@ namespace BLL.Services
     {
         IUnitOfWork Database { get; set; }
 
+        IMapper mapperFromDTO,
+                mapperToDTO;
+
+
         public JobService(IUnitOfWork uow)
         {
             this.Database = uow;
+
+            var jlMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobLocationDTO, JobLocation>()).CreateMapper();
+            var jtMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobTypeDTO, JobType>()).CreateMapper();
+            var ssMapper = new MapperConfiguration(cfg => cfg.CreateMap<SkillSetDTO, SkillSet>()).CreateMapper();
+            mapperFromDTO = new MapperConfiguration(cfg => cfg.CreateMap<JobPostDTO, JobPost>()
+                                            .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapper.Map<IEnumerable<SkillSetDTO>, IEnumerable<SkillSet>>(s.SkillSets)))
+                                            .ForMember(d => d.JobLocation, o => o.MapFrom(s => jlMapper.Map<JobLocationDTO, JobLocation>(s.JobLocation)))
+                                            .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapper.Map<IEnumerable<JobTypeDTO>, IEnumerable<JobType>>(s.JobType)))).CreateMapper();
+            var jlMapperToDTO = new MapperConfiguration(cfg => cfg.CreateMap<JobLocation, JobLocationDTO>()).CreateMapper();
+            var jtMapperToDTO = new MapperConfiguration(cfg => cfg.CreateMap<JobType, JobTypeDTO>()).CreateMapper();
+            var ssMapperToDTO = new MapperConfiguration(cfg => cfg.CreateMap<SkillSet, SkillSetDTO>()).CreateMapper();
+            mapperToDTO = new MapperConfiguration(cfg => cfg.CreateMap<JobPost, JobPostDTO>()
+                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapperToDTO.Map<IEnumerable<SkillSet>, IEnumerable<SkillSetDTO>>(s.SkillSets)))
+                                                .ForMember(d => d.JobLocation, o => o.MapFrom(s => jlMapperToDTO.Map<JobLocation, JobLocationDTO>(s.JobLocation)))
+                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapperToDTO.Map<IEnumerable<JobType>, IEnumerable<JobTypeDTO>>(s.JobType)))).CreateMapper();
         }
 
         public void Create(JobPostDTO jobPost)
         {
             if (Database.JobPosts.Get(jobPost.Id) != null)
                 throw new ValidationException("Job post already exists", "JobPost");
-            var jlMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobLocationDTO, JobLocation>()).CreateMapper();
-            var jtMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobTypeDTO, JobType>()).CreateMapper();
-            var ssMapper = new MapperConfiguration(cfg => cfg.CreateMap<SkillSetDTO, SkillSet>()).CreateMapper();
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<JobPostDTO, JobPost>()
-                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapper.Map<IEnumerable<SkillSetDTO>, IEnumerable<SkillSet>>(s.SkillSets)))
-                                                .ForMember(d => d.JobLocation, o => o.MapFrom(s => jlMapper.Map<JobLocationDTO, JobLocation>(s.JobLocation)))
-                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapper.Map<IEnumerable<JobTypeDTO>, IEnumerable<JobType>>(s.JobType)))).CreateMapper();
-            var post = mapper.Map<JobPostDTO, JobPost>(jobPost);
+            var post = mapperFromDTO.Map<JobPostDTO, JobPost>(jobPost);
             post.SubmitedResumes = new List<SeekerResume>();
             Database.JobPosts.Create(post);
         }
@@ -45,14 +57,7 @@ namespace BLL.Services
                                                    IEnumerable<DateTime> dateTimes,
                                                    IEnumerable<SkillSetDTO> skillSets) //NEEDS TESTING, DATA COMPARISON COULD BE INCORRECT
         {
-            var jlMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobLocation, JobLocationDTO>()).CreateMapper();
-            var jtMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobType, JobTypeDTO>()).CreateMapper();
-            var ssMapper = new MapperConfiguration(cfg => cfg.CreateMap<SkillSet, SkillSetDTO>()).CreateMapper();
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<JobPost, JobPostDTO>()
-                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapper.Map<IEnumerable<SkillSet>, IEnumerable<SkillSetDTO>>(s.SkillSets)))
-                                                .ForMember(d => d.JobLocation, o => o.MapFrom(s => jlMapper.Map<JobLocation, JobLocationDTO>(s.JobLocation)))
-                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapper.Map<IEnumerable<JobType>, IEnumerable<JobTypeDTO>>(s.JobType)))).CreateMapper();
-            var posts = mapper.Map<IEnumerable<JobPost>, List<JobPostDTO>>(Database.JobPosts.GetAll());
+            var posts = mapperToDTO.Map<IEnumerable<JobPost>, List<JobPostDTO>>(Database.JobPosts.GetAll());
             if (posts.Count == 0)
                 throw new ValidationException("No matches", "JobPost");
             return posts.Where(p => p.JobType.Any(x => types.Contains(x))
@@ -62,14 +67,7 @@ namespace BLL.Services
 
         public IEnumerable<JobPostDTO> Find(string key)
         {
-            var jlMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobLocation, JobLocationDTO>()).CreateMapper();
-            var jtMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobType, JobTypeDTO>()).CreateMapper();
-            var ssMapper = new MapperConfiguration(cfg => cfg.CreateMap<SkillSet, SkillSetDTO>()).CreateMapper();
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<JobPost, JobPostDTO>()
-                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapper.Map<IEnumerable<SkillSet>, IEnumerable<SkillSetDTO>>(s.SkillSets)))
-                                                .ForMember(d => d.JobLocation, o => o.MapFrom(s => jlMapper.Map<JobLocation, JobLocationDTO>(s.JobLocation)))
-                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapper.Map<IEnumerable<JobType>, IEnumerable<JobTypeDTO>>(s.JobType)))).CreateMapper();
-            var posts = mapper.Map<IEnumerable<JobPost>, List<JobPostDTO>>(Database.JobPosts.GetAll());
+            var posts = mapperToDTO.Map<IEnumerable<JobPost>, List<JobPostDTO>>(Database.JobPosts.GetAll());
             if (posts.Count == 0)
                 throw new ValidationException("No matches", "JobPost");
             return posts.Where(p => p.CompanyName.ToLower().Contains(key.ToLower()));
@@ -82,26 +80,12 @@ namespace BLL.Services
             var vacancy = Database.JobPosts.Get(Id.Value);
             if (vacancy == null)
                 throw new ValidationException("Job post not found", "JobPost");
-            var jlMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobLocation, JobLocationDTO>()).CreateMapper();
-            var jtMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobType, JobTypeDTO>()).CreateMapper();
-            var ssMapper = new MapperConfiguration(cfg => cfg.CreateMap<SkillSet, SkillSetDTO>()).CreateMapper();
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<JobPost, JobPostDTO>()
-                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapper.Map<IEnumerable<SkillSet>, IEnumerable<SkillSetDTO>>(s.SkillSets)))
-                                                .ForMember(d => d.JobLocation, o => o.MapFrom(s => jlMapper.Map<JobLocation, JobLocationDTO>(s.JobLocation)))
-                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapper.Map<IEnumerable<JobType>, IEnumerable<JobTypeDTO>>(s.JobType)))).CreateMapper();
-            return mapper.Map<JobPost, JobPostDTO>(vacancy);
+            return mapperToDTO.Map<JobPost, JobPostDTO>(vacancy);
         }
 
         public IEnumerable<JobPostDTO> GetAll()
         {
-            var jlMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobLocation, JobLocationDTO>()).CreateMapper();
-            var jtMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobType, JobTypeDTO>()).CreateMapper();
-            var ssMapper = new MapperConfiguration(cfg => cfg.CreateMap<SkillSet, SkillSetDTO>()).CreateMapper();
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<JobPost, JobPostDTO>()
-                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapper.Map<IEnumerable<SkillSet>, IEnumerable<SkillSetDTO>>(s.SkillSets)))
-                                                .ForMember(d => d.JobLocation, o => o.MapFrom(s => jlMapper.Map<JobLocation, JobLocationDTO>(s.JobLocation)))
-                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapper.Map<IEnumerable<JobType>, IEnumerable<JobTypeDTO>>(s.JobType)))).CreateMapper();
-            var posts = mapper.Map<IEnumerable<JobPost>, List<JobPostDTO>>(Database.JobPosts.GetAll());
+            var posts = mapperToDTO.Map<IEnumerable<JobPost>, List<JobPostDTO>>(Database.JobPosts.GetAll());
             if (posts.Count == 0)
                 throw new ValidationException("No job posts yet", "JobPost");
             return posts;
@@ -109,14 +93,7 @@ namespace BLL.Services
 
         public IEnumerable<JobPostDTO> GetAll(string id)
         {
-            var jlMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobLocation, JobLocationDTO>()).CreateMapper();
-            var jtMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobType, JobTypeDTO>()).CreateMapper();
-            var ssMapper = new MapperConfiguration(cfg => cfg.CreateMap<SkillSet, SkillSetDTO>()).CreateMapper();
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<JobPost, JobPostDTO>()
-                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapper.Map<IEnumerable<SkillSet>, IEnumerable<SkillSetDTO>>(s.SkillSets)))
-                                                .ForMember(d => d.JobLocation, o => o.MapFrom(s => jlMapper.Map<JobLocation, JobLocationDTO>(s.JobLocation)))
-                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapper.Map<IEnumerable<JobType>, IEnumerable<JobTypeDTO>>(s.JobType)))).CreateMapper();
-            var posts = mapper.Map<IEnumerable<JobPost>, List<JobPostDTO>>(Database.JobPosts.GetAll());
+            var posts = mapperToDTO.Map<IEnumerable<JobPost>, List<JobPostDTO>>(Database.JobPosts.GetAll());
             if (posts.Count == 0)
                 throw new ValidationException("No matches", "JobPost");
             return posts.Where(p => p.PostedByID == id);
@@ -132,14 +109,7 @@ namespace BLL.Services
 
         public void Change(JobPostDTO value) 
         {
-            var jlMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobLocationDTO, JobLocation>()).CreateMapper();
-            var jtMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobTypeDTO, JobType>()).CreateMapper();
-            var ssMapper = new MapperConfiguration(cfg => cfg.CreateMap<SkillSetDTO, SkillSet>()).CreateMapper();
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<JobPostDTO, JobPost>()
-                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapper.Map<IEnumerable<SkillSetDTO>, IEnumerable<SkillSet>>(s.SkillSets)))
-                                                .ForMember(d => d.JobLocation, o => o.MapFrom(s => jlMapper.Map<JobLocationDTO, JobLocation>(s.JobLocation)))
-                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapper.Map<IEnumerable<JobTypeDTO>, IEnumerable<JobType>>(s.JobType)))).CreateMapper();
-            var newPost = mapper.Map<JobPostDTO, JobPost>(value);
+            var newPost = mapperFromDTO.Map<JobPostDTO, JobPost>(value);
             var oldPost = Database.JobPosts.Get(value.Id);
             newPost.SubmitedResumes = oldPost.SubmitedResumes;
             Database.JobPosts.Update(newPost);

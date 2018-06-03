@@ -20,25 +20,38 @@ namespace BLL.Services
     {
         IUnitOfWork Database { get; set; }
 
+        IMapper mapperFromDTO,
+                mapperToDTO;
+
         public ResumeService(IUnitOfWork uow)
         {
             this.Database = uow;
+
+            var edMapper = new MapperConfiguration(cfg => cfg.CreateMap<EducationDetailDTO, EducationDetail>()).CreateMapper();
+            var exMapper = new MapperConfiguration(cfg => cfg.CreateMap<ExperienceDetailDTO, ExperienceDetail>()).CreateMapper();
+            var jtMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobTypeDTO, JobType>()).CreateMapper();
+            var ssMapper= new MapperConfiguration(cfg => cfg.CreateMap<SkillSetDTO, SkillSet>()).CreateMapper();
+            mapperFromDTO = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResumeDTO, SeekerResume>()
+                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapper.Map<IEnumerable<SkillSetDTO>, IEnumerable<SkillSet>>(s.SkillSets)))
+                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapper.Map<IEnumerable<JobTypeDTO>, IEnumerable<JobType>>(s.JobType)))
+                                                .ForMember(d => d.EducationDetails, o => o.MapFrom(s => edMapper.Map<IEnumerable<EducationDetailDTO>, IEnumerable<EducationDetail>>(s.EducationDetails)))
+                                                .ForMember(d => d.ExperienceDetails, o => o.MapFrom(s => exMapper.Map<IEnumerable<ExperienceDetailDTO>, IEnumerable<ExperienceDetail>>(s.ExperienceDetails)))).CreateMapper();
+            var edMapperToDTO = new MapperConfiguration(cfg => cfg.CreateMap<EducationDetail, EducationDetailDTO>()).CreateMapper();
+            var exMapperToDTO = new MapperConfiguration(cfg => cfg.CreateMap<ExperienceDetail, ExperienceDetailDTO>()).CreateMapper();
+            var jtMapperToDTO = new MapperConfiguration(cfg => cfg.CreateMap<JobType, JobTypeDTO>()).CreateMapper();
+            var ssMapperToDTO = new MapperConfiguration(cfg => cfg.CreateMap<SkillSet, SkillSetDTO>()).CreateMapper();
+            mapperToDTO = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResume, SeekerResumeDTO>()
+                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapperToDTO.Map<IEnumerable<SkillSet>, IEnumerable<SkillSetDTO>>(s.SkillSets)))
+                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapperToDTO.Map<IEnumerable<JobType>, IEnumerable<JobTypeDTO>>(s.JobType)))
+                                                .ForMember(d => d.EducationDetails, o => o.MapFrom(s => edMapperToDTO.Map<IEnumerable<EducationDetail>, IEnumerable<EducationDetailDTO>>(s.EducationDetails)))
+                                                .ForMember(d => d.ExperienceDetails, o => o.MapFrom(s => exMapperToDTO.Map<IEnumerable<ExperienceDetail>, IEnumerable<ExperienceDetailDTO>>(s.ExperienceDetails)))).CreateMapper();
         }
 
         public void Create(SeekerResumeDTO resume)
         {
             if (Database.SeekerResumes.Get(resume.Id) != null)
                 throw new ValidationException("Job post already exists", "SeekerResume");
-            var edMapper = new MapperConfiguration(cfg => cfg.CreateMap<EducationDetailDTO, EducationDetail>()).CreateMapper();
-            var exMapper = new MapperConfiguration(cfg => cfg.CreateMap<ExperienceDetailDTO, ExperienceDetail>()).CreateMapper();
-            var jtMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobTypeDTO, JobType>()).CreateMapper();
-            var ssMapper = new MapperConfiguration(cfg => cfg.CreateMap<SkillSetDTO, SkillSet>()).CreateMapper();
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResumeDTO, SeekerResume>()
-                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapper.Map<IEnumerable<SkillSetDTO>, IEnumerable<SkillSet>>(s.SkillSets)))
-                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapper.Map<IEnumerable<JobTypeDTO>, IEnumerable<JobType>>(s.JobType)))
-                                                .ForMember(d => d.EducationDetails, o => o.MapFrom(s => edMapper.Map<IEnumerable<EducationDetailDTO>, IEnumerable<EducationDetail>>(s.EducationDetails)))
-                                                .ForMember(d => d.ExperienceDetails, o => o.MapFrom(s => exMapper.Map<IEnumerable<ExperienceDetailDTO>, IEnumerable<ExperienceDetail>>(s.ExperienceDetails)))).CreateMapper();
-            var newResume = mapper.Map<SeekerResumeDTO, SeekerResume>(resume);
+            var newResume = mapperFromDTO.Map<SeekerResumeDTO, SeekerResume>(resume);
             newResume.VacanciesAcceptedBy = new List<JobPost>();
             Database.SeekerResumes.Create(newResume);
         }
@@ -47,16 +60,7 @@ namespace BLL.Services
                                                    IEnumerable<DateTime> dateTimes,
                                                    IEnumerable<SkillSetDTO> skillSets) //NEEDS TESTING
         {
-            var edMapper = new MapperConfiguration(cfg => cfg.CreateMap<EducationDetail, EducationDetailDTO>()).CreateMapper();
-            var exMapper = new MapperConfiguration(cfg => cfg.CreateMap<ExperienceDetail, ExperienceDetailDTO>()).CreateMapper();
-            var jtMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobType, JobTypeDTO>()).CreateMapper();
-            var ssMapper = new MapperConfiguration(cfg => cfg.CreateMap<SkillSet, SkillSetDTO>()).CreateMapper();
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResume, SeekerResumeDTO>()
-                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapper.Map<IEnumerable<SkillSet>, IEnumerable<SkillSetDTO>>(s.SkillSets)))
-                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapper.Map<IEnumerable<JobType>, IEnumerable<JobTypeDTO>>(s.JobType)))
-                                                .ForMember(d => d.EducationDetails, o => o.MapFrom(s => edMapper.Map<IEnumerable<EducationDetail>, IEnumerable<EducationDetailDTO>>(s.EducationDetails)))
-                                                .ForMember(d => d.ExperienceDetails, o => o.MapFrom(s => exMapper.Map<IEnumerable<ExperienceDetail>, IEnumerable<ExperienceDetailDTO>>(s.ExperienceDetails)))).CreateMapper();
-            var resumes = mapper.Map<IEnumerable<SeekerResume>, List<SeekerResumeDTO>>(Database.SeekerResumes.GetAll());
+            var resumes = mapperToDTO.Map<IEnumerable<SeekerResume>, List<SeekerResumeDTO>>(Database.SeekerResumes.GetAll());
             if (resumes.Count == 0)
                 throw new ValidationException("No matches", "SeekerResume");
             return resumes.Where(p => p.ExperienceDetails.Any(x => dateTimes.Any(y => (x.EndDate - x.StartDate) >= y.TimeOfDay))
@@ -66,16 +70,7 @@ namespace BLL.Services
 
         public IEnumerable<SeekerResumeDTO> Find(string key)
         {
-            var edMapper = new MapperConfiguration(cfg => cfg.CreateMap<EducationDetail, EducationDetailDTO>()).CreateMapper();
-            var exMapper = new MapperConfiguration(cfg => cfg.CreateMap<ExperienceDetail, ExperienceDetailDTO>()).CreateMapper();
-            var jtMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobType, JobTypeDTO>()).CreateMapper();
-            var ssMapper = new MapperConfiguration(cfg => cfg.CreateMap<SkillSet, SkillSetDTO>()).CreateMapper();
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResume, SeekerResumeDTO>()
-                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapper.Map<IEnumerable<SkillSet>, IEnumerable<SkillSetDTO>>(s.SkillSets)))
-                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapper.Map<IEnumerable<JobType>, IEnumerable<JobTypeDTO>>(s.JobType)))
-                                                .ForMember(d => d.EducationDetails, o => o.MapFrom(s => edMapper.Map<IEnumerable<EducationDetail>, IEnumerable<EducationDetailDTO>>(s.EducationDetails)))
-                                                .ForMember(d => d.ExperienceDetails, o => o.MapFrom(s => exMapper.Map<IEnumerable<ExperienceDetail>, IEnumerable<ExperienceDetailDTO>>(s.ExperienceDetails)))).CreateMapper();
-            var resumes = mapper.Map<IEnumerable<SeekerResume>, List<SeekerResumeDTO>>(Database.SeekerResumes.GetAll());
+            var resumes = mapperToDTO.Map<IEnumerable<SeekerResume>, List<SeekerResumeDTO>>(Database.SeekerResumes.GetAll());
             if (resumes.Count == 0)
                 throw new ValidationException("No matches", "SeekerResume");
             return resumes.Where(p => p.FirstName.ToLower().Contains(key.ToLower()) 
@@ -89,30 +84,12 @@ namespace BLL.Services
             var resume = Database.SeekerResumes.Get(Id.Value);
             if (resume == null)
                 throw new ValidationException("Resume not found", "SeekerResume");
-            var edMapper = new MapperConfiguration(cfg => cfg.CreateMap<EducationDetail, EducationDetailDTO>()).CreateMapper();
-            var exMapper = new MapperConfiguration(cfg => cfg.CreateMap<ExperienceDetail, ExperienceDetailDTO>()).CreateMapper();
-            var jtMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobType, JobTypeDTO>()).CreateMapper();
-            var ssMapper = new MapperConfiguration(cfg => cfg.CreateMap<SkillSet, SkillSetDTO>()).CreateMapper();
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResume, SeekerResumeDTO>()
-                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapper.Map<IEnumerable<SkillSet>, IEnumerable<SkillSetDTO>>(s.SkillSets)))
-                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapper.Map<IEnumerable<JobType>, IEnumerable<JobTypeDTO>>(s.JobType)))
-                                                .ForMember(d => d.EducationDetails, o => o.MapFrom(s => edMapper.Map<IEnumerable<EducationDetail>, IEnumerable<EducationDetailDTO>>(s.EducationDetails)))
-                                                .ForMember(d => d.ExperienceDetails, o => o.MapFrom(s => exMapper.Map<IEnumerable<ExperienceDetail>, IEnumerable<ExperienceDetailDTO>>(s.ExperienceDetails)))).CreateMapper();
-            return mapper.Map<SeekerResume, SeekerResumeDTO>(resume);
+            return mapperToDTO.Map<SeekerResume, SeekerResumeDTO>(resume);
         }
 
         public IEnumerable<SeekerResumeDTO> GetAll()
         {
-            var edMapper = new MapperConfiguration(cfg => cfg.CreateMap<EducationDetail, EducationDetailDTO>()).CreateMapper();
-            var exMapper = new MapperConfiguration(cfg => cfg.CreateMap<ExperienceDetail, ExperienceDetailDTO>()).CreateMapper();
-            var jtMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobType, JobTypeDTO>()).CreateMapper();
-            var ssMapper = new MapperConfiguration(cfg => cfg.CreateMap<SkillSet, SkillSetDTO>()).CreateMapper();
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResume, SeekerResumeDTO>()
-                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapper.Map<IEnumerable<SkillSet>, IEnumerable<SkillSetDTO>>(s.SkillSets)))
-                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapper.Map<IEnumerable<JobType>, IEnumerable<JobTypeDTO>>(s.JobType)))
-                                                .ForMember(d => d.EducationDetails, o => o.MapFrom(s => edMapper.Map<IEnumerable<EducationDetail>, IEnumerable<EducationDetailDTO>>(s.EducationDetails)))
-                                                .ForMember(d => d.ExperienceDetails, o => o.MapFrom(s => exMapper.Map<IEnumerable<ExperienceDetail>, IEnumerable<ExperienceDetailDTO>>(s.ExperienceDetails)))).CreateMapper();
-            var resumes = mapper.Map<IEnumerable<SeekerResume>, List<SeekerResumeDTO>>(Database.SeekerResumes.GetAll());
+            var resumes = mapperToDTO.Map<IEnumerable<SeekerResume>, List<SeekerResumeDTO>>(Database.SeekerResumes.GetAll());
             if (resumes.Count == 0)
                 throw new ValidationException("No resumes yet", "SeekerResume");
             return resumes;
@@ -120,16 +97,7 @@ namespace BLL.Services
 
         public IEnumerable<SeekerResumeDTO> GetAll(string id)
         {
-            var edMapper = new MapperConfiguration(cfg => cfg.CreateMap<EducationDetail, EducationDetailDTO>()).CreateMapper();
-            var exMapper = new MapperConfiguration(cfg => cfg.CreateMap<ExperienceDetail, ExperienceDetailDTO>()).CreateMapper();
-            var jtMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobType, JobTypeDTO>()).CreateMapper();
-            var ssMapper = new MapperConfiguration(cfg => cfg.CreateMap<SkillSet, SkillSetDTO>()).CreateMapper();
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResume, SeekerResumeDTO>()
-                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapper.Map<IEnumerable<SkillSet>, IEnumerable<SkillSetDTO>>(s.SkillSets)))
-                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapper.Map<IEnumerable<JobType>, IEnumerable<JobTypeDTO>>(s.JobType)))
-                                                .ForMember(d => d.EducationDetails, o => o.MapFrom(s => edMapper.Map<IEnumerable<EducationDetail>, IEnumerable<EducationDetailDTO>>(s.EducationDetails)))
-                                                .ForMember(d => d.ExperienceDetails, o => o.MapFrom(s => exMapper.Map<IEnumerable<ExperienceDetail>, IEnumerable<ExperienceDetailDTO>>(s.ExperienceDetails)))).CreateMapper();
-            var resumes = mapper.Map<IEnumerable<SeekerResume>, List<SeekerResumeDTO>>(Database.SeekerResumes.GetAll());
+            var resumes = mapperToDTO.Map<IEnumerable<SeekerResume>, List<SeekerResumeDTO>>(Database.SeekerResumes.GetAll());
             if (resumes.Count == 0)
                 throw new ValidationException("No matches", "SeekerResume");
             return resumes.Where(p => p.UserID == id);
@@ -146,16 +114,7 @@ namespace BLL.Services
 
         public void Change(SeekerResumeDTO value)
         {
-            var edMapper = new MapperConfiguration(cfg => cfg.CreateMap<EducationDetailDTO, EducationDetail>()).CreateMapper();
-            var exMapper = new MapperConfiguration(cfg => cfg.CreateMap<ExperienceDetailDTO, ExperienceDetail>()).CreateMapper();
-            var jtMapper = new MapperConfiguration(cfg => cfg.CreateMap<JobTypeDTO, JobType>()).CreateMapper();
-            var ssMapper = new MapperConfiguration(cfg => cfg.CreateMap<SkillSetDTO, SkillSet>()).CreateMapper();
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<SeekerResumeDTO, SeekerResume>()
-                                                .ForMember(d => d.SkillSets, o => o.MapFrom(s => ssMapper.Map<IEnumerable<SkillSetDTO>, IEnumerable<SkillSet>>(s.SkillSets)))
-                                                .ForMember(d => d.JobType, o => o.MapFrom(s => jtMapper.Map<IEnumerable<JobTypeDTO>, IEnumerable<JobType>>(s.JobType)))
-                                                .ForMember(d => d.EducationDetails, o => o.MapFrom(s => edMapper.Map<IEnumerable<EducationDetailDTO>, IEnumerable<EducationDetail>>(s.EducationDetails)))
-                                                .ForMember(d => d.ExperienceDetails, o => o.MapFrom(s => exMapper.Map<IEnumerable<ExperienceDetailDTO>, IEnumerable<ExperienceDetail>>(s.ExperienceDetails)))).CreateMapper();
-            var newResume = mapper.Map<SeekerResumeDTO, SeekerResume>(value);
+            var newResume = mapperFromDTO.Map<SeekerResumeDTO, SeekerResume>(value);
             var oldResume = Database.SeekerResumes.Get(value.Id);
             newResume.VacanciesAcceptedBy = oldResume.VacanciesAcceptedBy;
             Database.SeekerResumes.Update(newResume);
