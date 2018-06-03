@@ -66,5 +66,26 @@ namespace BLL.UnitTests
             // Assert
             _unitOfWork.JobPosts.Received(1).Delete(Id);
         }
+
+        [Test]
+        public void Find_returns_value()
+        {
+            // Arrange
+            /*
+            _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+                                    .ForEach(b => _fixture.Behaviors.Remove(b));
+            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());*/
+
+            JobPost jobPost = _fixture.Create<JobPost>();
+            string key = _fixture.Create<string>();
+            jobPost.CompanyName = key;
+            _unitOfWork.JobPosts.GetAll().Returns(new[] { jobPost });
+
+            // Act
+            IEnumerable<JobPostDTO> tPosts = _service.Find(key);
+
+            // Assert
+            Assert.That(tPosts.Count() == 1);
+        }
     }
 }
