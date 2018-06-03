@@ -22,6 +22,8 @@ namespace BLL.Interfaces
 
         IEnumerable<JobPostDTO> GetAll();
 
+        IEnumerable<JobPostDTO> GetAll(string id);
+
         void Delete(int? Id);
 
         void Change(JobPostDTO value);
