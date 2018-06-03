@@ -22,6 +22,8 @@ namespace BLL.Interfaces
 
         IEnumerable<SeekerResumeDTO> GetAll();
 
+        IEnumerable<SeekerResumeDTO> GetAll(string id);
+
         void Delete(int? Id);
 
         void Change(SeekerResumeDTO value);
