@@ -48,5 +48,23 @@ namespace BLL.UnitTests
                                                  && p.JobLocation != null));
         }
 
+        [Test]
+        public void Delete_should_call_repository_delete_once()
+        {
+            // Arrange
+            _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+                                    .ForEach(b => _fixture.Behaviors.Remove(b));
+            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+            JobPost jobPost = _fixture.Create<JobPost>();
+            int Id = _fixture.Create<int>();
+            _unitOfWork.JobPosts.Get(Id).Returns(jobPost);
+
+            // Act
+            _service.Delete(Id);
+
+            // Assert
+            _unitOfWork.JobPosts.Received(1).Delete(Id);
+        }
     }
 }
